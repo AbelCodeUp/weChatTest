@@ -1,5 +1,6 @@
 
-var Promise = require('bluebird');
+const Promise = require('bluebird');
+const util = require('./util');
 var request = Promise.promisify(require('request'));
 
 var prefix = 'https://api.weixin.qq.com/cgi-bin/';
@@ -24,7 +25,7 @@ class Wechat {
          }
          if(this.isValidAccessToken(data)){
            // Promise.resolve(data);
-           
+
            this.access_token = data.access_token;
            this.expires_in = data.expires_in;
 
@@ -71,6 +72,18 @@ class Wechat {
 
       })
     })
+  }
+
+  reply(ctx){
+    let content = ctx.body;
+    let message = ctx.weixin;
+
+    let xml = util.tpl(content, message);
+
+    ctx.status = 200;
+    ctx.type = 'application/xml';
+    ctx.body = xml;
+
   }
 
 }

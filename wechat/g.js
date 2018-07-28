@@ -35,23 +35,11 @@ module.exports = function(opts) {
       var message = util.formatMessage(content.xml);
       console.log(message);
 
-      var now = new Date().getTime();
-      if(message.MsgType === 'event'){
-        if(message.Event === 'subscribe'){
-          var xmlString = 'success';
-          // var xmlString = ;
-          // console.log(xmlString);
-          ctx.type = 'application/xml';
-          ctx.body = xmlString
-          return;
-        }
-      }else{
-        var xmlString = 'success';
-        // console.log(xmlString);
-        ctx.type = 'application/xml';
-        ctx.body = xmlString
-        return;
-      }
+      ctx.weixin = message;
+
+      // await handler.call(ctx, next);
+
+      wechat.reply(ctx);
 
     }
 
