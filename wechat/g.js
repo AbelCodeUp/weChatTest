@@ -4,9 +4,8 @@ const getRawBody = require('raw-body');
 const util = require('./util');
 
 module.exports = function(opts) {
-  //var wechat = new Wechat(opts);
-
-  return async ctx => {
+  var wechat = new Wechat(opts);
+  return async ( ctx, next ) => {
     var token = opts.token;
     var signature = ctx.query.signature;
     var nonce = ctx.query.nonce;
@@ -14,7 +13,6 @@ module.exports = function(opts) {
     var echostr = ctx.query.echostr;
     var str = [token, timestamp, nonce].sort().join('');
     var sha = sha1(str);
-
     if (ctx.method === 'GET') {
       if (sha === signature) {
         ctx.body = echostr + '';
@@ -34,20 +32,28 @@ module.exports = function(opts) {
       })
 
       var content = await util.parseXMLAsync(data);
-
-      console.log(content);
-
       var message = util.formatMessage(content.xml);
+      console.log(message);
+      var now = new Date().getTime();
       if(message.MsgType === 'event'){
         if(message.Event === 'subscribe'){
-          var now = new Date().getTime();
-
-          ctx.status = 200;
+          // var xmlString = 'success';
+          var xmlString = '<xml>'+
+            	'<ToUserName><![CDATA['+ message.FromUserName +']]></ToUserName>'+
+            	'<FromUserName><![CDATA[' + message.ToUserName + ']]></FromUserName>'+
+            	'<CreateTime>'+ now +'</CreateTime>'+
+            	'<MsgType><![CDATA[text]]></MsgType>'+
+            	'<Content><![CDATA[你好，欢迎关注我是一个莫名奇妙的男人]]></Content>'+
+            '</xml>';
+          // console.log(xmlString);
           ctx.type = 'application/xml';
-          ctx.body = `<xml><ToUserName>< ![CDATA[${message.FromUserName}] ]></ToUserName><FromUserName>< ![CDATA[${message.ToUserName}] ]></FromUserName><CreateTime>${now}</CreateTime><MsgType>< ![CDATA[text]]></MsgType><Content>< ![CDATA[Hi，童鞋]]></Content></xml>`;
-
-          return;
+          ctx.body = xmlString
         }
+      }else{
+        var xmlString = 'success';
+        // console.log(xmlString);
+        ctx.type = 'application/xml';
+        ctx.body = xmlString
       }
 
     }
