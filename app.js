@@ -5,9 +5,8 @@ const sha1 = require('sha1');
 const wechat = require('./wechat/g');
 const util = require('./libs/until');
 const path = require('path');
-
-
 var wechat_file = path.join(__dirname, './config/wechat.txt');
+
 let config = {
   wechat:{
     appID:'wx0df753849c2f6a0e',

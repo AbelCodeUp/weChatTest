@@ -34,26 +34,23 @@ module.exports = function(opts) {
       var content = await util.parseXMLAsync(data);
       var message = util.formatMessage(content.xml);
       console.log(message);
+
       var now = new Date().getTime();
       if(message.MsgType === 'event'){
         if(message.Event === 'subscribe'){
-          // var xmlString = 'success';
-          var xmlString = '<xml>'+
-            	'<ToUserName><![CDATA['+ message.FromUserName +']]></ToUserName>'+
-            	'<FromUserName><![CDATA[' + message.ToUserName + ']]></FromUserName>'+
-            	'<CreateTime>'+ now +'</CreateTime>'+
-            	'<MsgType><![CDATA[text]]></MsgType>'+
-            	'<Content><![CDATA[你好，欢迎关注我是一个莫名奇妙的男人]]></Content>'+
-            '</xml>';
+          var xmlString = 'success';
+          // var xmlString = ;
           // console.log(xmlString);
           ctx.type = 'application/xml';
           ctx.body = xmlString
+          return;
         }
       }else{
         var xmlString = 'success';
         // console.log(xmlString);
         ctx.type = 'application/xml';
         ctx.body = xmlString
+        return;
       }
 
     }
