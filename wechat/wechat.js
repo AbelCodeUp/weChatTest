@@ -74,11 +74,13 @@ class Wechat {
     })
   }
 
-  reply(ctx){
-    let content = ctx.body;
-    let message = ctx.weixin;
+  reply(Body,ctx,message){
+    let msg = message;
+    let content = Body;
 
-    let xml = util.tpl(content, message);
+    let xml = util.tpl(content, msg);
+
+    console.log(xml);
 
     ctx.status = 200;
     ctx.type = 'application/xml';

@@ -3,7 +3,7 @@ const Wechat = require('./wechat');
 const getRawBody = require('raw-body');
 const util = require('./util');
 
-module.exports = function(opts) {
+module.exports = function( opts, handler ) {
   var wechat = new Wechat(opts);
   return async ( ctx, next ) => {
     var token = opts.token;
@@ -33,13 +33,12 @@ module.exports = function(opts) {
 
       var content = await util.parseXMLAsync(data);
       var message = util.formatMessage(content.xml);
-      console.log(message);
 
-      ctx.weixin = message;
+      var Body = {};
 
-      // await handler.call(ctx, next);
+      await handler(Body, message, next);
 
-      wechat.reply(ctx);
+      wechat.reply(Body,ctx,message);
 
     }
 
