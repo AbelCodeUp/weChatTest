@@ -34,6 +34,8 @@ module.exports = function( opts, handler ) {
       var content = await util.parseXMLAsync(data);
       var message = util.formatMessage(content.xml);
 
+      console.log(message);
+
       var Body = {};
 
       await handler(Body, message, next);

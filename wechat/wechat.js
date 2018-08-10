@@ -1,11 +1,13 @@
 
 const Promise = require('bluebird');
 const util = require('./util');
+const fs = require('fs');
 var request = Promise.promisify(require('request'));
 
 var prefix = 'https://api.weixin.qq.com/cgi-bin/';
 var api = {
-  accessToken: prefix + 'token?grant_type=client_credential'
+  accessToken: prefix + 'token?grant_type=client_credential',
+  upload: prefix + 'media/upload?',
 }
 
 class Wechat {
@@ -14,26 +16,39 @@ class Wechat {
     this.appSecret = opts.appSecret;
     this.getAccessToken = opts.getAccessToken;
     this.saveAccessToken = opts.saveAccessToken;
+    this.fetchAccessToken();
 
+  }
+
+  fetchAccessToken(){
+    if(this.access_token && this.expires_in){
+      if(this.isValidAccessToken(this)){
+        return Promise.resolve(this);
+      }
+    }
     this.getAccessToken()
       .then(data=>{
          try {
            data = JSON.parse(data);
          }
          catch(e){
-            return this.updateAccessToken(data);
+            return this.updateAccessToken();
          }
+
          if(this.isValidAccessToken(data)){
            // Promise.resolve(data);
-
-           this.access_token = data.access_token;
-           this.expires_in = data.expires_in;
-
-           this.saveAccessToken(data);
+           return Promise.resolve(data);
          }
          else{
-           return this.updateAccessToken(data);
+           return this.updateAccessToken();
          }
+      })
+      .then(data=>{
+        this.access_token = data.access_token;
+        this.expires_in = data.expires_in;
+
+
+        this.saveAccessToken(data);
       })
   }
   isValidAccessToken (data){
@@ -67,13 +82,44 @@ class Wechat {
         var expires_in = now + (data.expires_in - 10) * 1000;
 
         data.expires_in = expires_in;
-
         resolve(data);
 
       })
     })
   }
 
+  uploadMaterial(type, filepath){
+    let form = {
+      media:fs.createReadStream(filepath)
+    };
+
+    return new Promise((resolve, reject)=>{
+      this
+        .fetchAccessToken()
+        .then(data=>{
+          var url = `${api.upload}&access_token=${data.access_token}&type=${type}`;
+          request({
+            method: 'POST',
+            url:url,
+            formData:form,
+            json:true
+          }).then(res=>{
+            let _data = res.body
+            if(_data){
+              resolve(_data);
+            }else{
+              throw new Error('upload material fails');
+            }
+
+          })
+          .catch(err=>{
+            reject(err);
+          })
+        })
+
+    })
+
+  }
   reply(Body,ctx,message){
     let msg = message;
     let content = Body;
